@@ -137,14 +137,14 @@ select top 1 Suppliers.companyName, count(OrderID) as Num from Suppliers
 join Products on Products.SupplierID = Suppliers.SupplierID
 join [Order Details] on Products.ProductID = [Order Details].ProductID
 group by CompanyName
-order by Num desc
+order by Num desc -- Ÿle ig
 
 select Orders.OrderID, OrderDate, CompanyName, 
 sum(round((UnitPrice * (1-discount)) * quantity, 2)) as Wartosc
 from Orders
 join [Order Details] on [Order Details].OrderID = Orders.OrderID
 join Customers on Customers.CustomerID = Orders.CustomerID
-group by Orders.OrderID
+group by Orders.OrderID -- to tez Ÿle
 
 
 select distinct CompanyName, Phone from Customers as C
@@ -155,12 +155,19 @@ join Categories as CA on CA.CategoryID = P.CategoryID
 where CategoryName = 'Confections'
 
 -- do domu klienci którzy nie kupili z kat. confections i w roku 1997
-select distinct CompanyName, Phone from Customers as C
-join orders as O on o.CustomerID = C.CustomerID
-join [Order Details] as OD on OD.OrderID = o.OrderID
-join Products as P on p.ProductID = od.ProductID
-join Categories as CA on CA.CategoryID = P.CategoryID
-and ca.CategoryName != 'Confections'
+SELECT DISTINCT CompanyName, Phone
+FROM Customers AS C
+JOIN Orders AS O ON O.CustomerID = C.CustomerID
+WHERE C.CustomerID NOT IN (
+    SELECT C.CustomerID
+    FROM Customers AS C
+    JOIN Orders AS O ON O.CustomerID = C.CustomerID
+    JOIN [Order Details] AS OD ON OD.OrderID = O.OrderID
+    JOIN Products AS P ON P.ProductID = OD.ProductID
+    JOIN Categories AS CA ON CA.CategoryID = P.CategoryID
+    WHERE CA.CategoryName = 'Confections'
+) and YEAR(O.OrderDate) = 1997
+
 
 
 -- Æwiczenie 5
