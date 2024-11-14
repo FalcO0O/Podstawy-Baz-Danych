@@ -168,6 +168,20 @@ WHERE C.CustomerID NOT IN (
     WHERE CA.CategoryName = 'Confections'
 ) and YEAR(O.OrderDate) = 1997
 
+SELECT DISTINCT c.CompanyName, c.Phone
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+JOIN [Order Details] od ON o.OrderID = od.OrderID
+JOIN Products p ON od.ProductID = p.ProductID
+JOIN Categories cat ON p.CategoryID = cat.CategoryID
+WHERE YEAR(o.OrderDate) = 1997
+GROUP BY c.CustomerID, c.CompanyName, c.Phone
+HAVING SUM(CASE WHEN cat.CategoryName = 'Confections' THEN 1 ELSE 0 END) = 0;
+
+
+
+
+
 
 
 -- Æwiczenie 5
@@ -228,19 +242,31 @@ left join loanhist l on l.member_no = adult.member_no
 where year(j.birth_date) < 1996
 and (l.member_no is null or l.due_date > GETDATE())
 
+use library
+select firstname, lastname, count(*) as child_num
+from adult
+inner join dbo.member m on m.member_no = adult.member_no
+inner join dbo.juvenile j on adult.member_no = j.adult_member_no
+where state = 'AZ'
+group by firstname, lastname, m.member_no
+having count(*) > 2
 
-select m.firstName + ' ' + m.LastName as imie, j.adult_member_no from member m
-inner join adult a on m.member_no = a.member_no
-left join juvenile j on j.adult_member_no = a.member_no
-where a.state = 'AZ'
-or a.state = 'CA'
-group by 2 -- poprawic
-
-
+UNION
+select firstname, lastname, count(*) as child_num
+from adult
+inner join dbo.member m on m.member_no = adult.member_no
+inner join dbo.juvenile j on adult.member_no = j.adult_member_no
+where state = 'CA'
+group by firstname, lastname, m.member_no
+having count(*) > 3
+order by child_num desc
+	
 
 use Northwind
-select companyName, round(sum(od.UnitPrice * od.Quantity * (1-od.Discount)),2) as cena from Customers c
-join orders o on o.CustomerID = c.CustomerID
-left join [Order Details] od on od.OrderID = o.OrderID
-
-group by companyName
+SELECT o.OrderID, ROUND(SUM(od.Quantity * od.UnitPrice * (1-od.Discount)), 2) as koszt,
+e.FirstName, e.LastName FROM Orders o 
+INNER JOIN [Order Details] od ON o. OrderID = od.OrderID
+INNER JOIN Customers c ON o. CustomerID = c. CustomerID
+INNER JOIN Employees e ON o. EmployeeID = e. EmployeeID
+GROUP BY o.OrderID, c.CompanyName,e.FirstName, e. LastName 
+HAVING SUM(od.Quantity) > 250
