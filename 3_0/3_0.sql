@@ -146,7 +146,6 @@ join [Order Details] on [Order Details].OrderID = Orders.OrderID
 join Customers on Customers.CustomerID = Orders.CustomerID
 group by Orders.OrderID -- to tez Ÿle
 
-
 select distinct CompanyName, Phone from Customers as C
 join orders as O on o.CustomerID = C.CustomerID
 join [Order Details] as OD on OD.OrderID = o.OrderID
@@ -154,7 +153,8 @@ join Products as P on p.ProductID = od.ProductID
 join Categories as CA on CA.CategoryID = P.CategoryID
 where CategoryName = 'Confections'
 
--- do domu klienci którzy nie kupili z kat. confections i w roku 1997
+
+-- do domu klienci którzy nie kupili z kat. confections i w roku 1997 (bez podzapytañ!)
 SELECT DISTINCT CompanyName, Phone
 FROM Customers AS C
 JOIN Orders AS O ON O.CustomerID = C.CustomerID
@@ -174,6 +174,73 @@ WHERE C.CustomerID NOT IN (
 
 use library
 
-select (firstName + ' ' + lastName) as name, (street + ' ' + city + ' ' + state + ' ' + zip) as address from member
+select (firstName + ' ' + lastName) as name, (street + ' ' + city + ' ' + state + ' ' + zip) as address 
+from member
 inner join adult on adult.member_no = member.member_no
 
+
+select firstname, lastname, birth_date, 
+(street + ' ' + city + ' ' + state + ' ' + zip) as address 
+from member 
+inner join juvenile on member.member_no = juvenile.member_no
+inner join adult on juvenile.adult_member_no = adult.member_no
+
+
+-- podaj to wszystko i imiona rodziców
+SELECT m. firstname, m.lastname, j.birth_date, a.state, a.city, a. street,
+m2.firstname as adult_firstname, m2.lastname as adult_lastname
+FROM [member] m
+INNER JOIN juvenile j ON m. member_no = j.member_no
+INNER JOIN adult a ON j. adult_member_no = a.member_no
+INNER JOIN [member] m2 ON a.member_no = m2.member_no
+
+
+
+use Northwind
+-- napisz polecenie które wyœwietla pracownikow oraz ich podwladnych
+
+select employer.FirstName + ' ' + employer.lastName as pracownik,
+employee.FirstName + ' ' +employee.LastName as raportuje_do
+from Employees as employer
+inner join Employees as employee on employer.EmployeeID = employee.ReportsTo
+
+-- wyswietl pracownikow ktorzy nie maja podwladnych
+
+SELECT e.FirstName, e.lastname from Employees e
+LEFT JOIN Employees s on e.EmployeeID = s.ReportsTo
+where s.EmployeeID is null
+
+
+SELECT distinct e.FirstName, e.lastname from Employees e
+LEFT JOIN Employees s on e.EmployeeID = s.ReportsTo
+where s.EmployeeID is not null
+
+use library
+
+select distinct adult.member_no, (street + ' ' + city + ' ' + state + ' ' + zip) as address from [member]
+inner join adult on member.member_no = adult.member_no
+inner join juvenile on adult.member_no = juvenile.adult_member_no
+where year(juvenile.birth_date) < 1996
+
+select distinct adult.member_no, (street + ' ' + city + ' ' + state + ' ' + zip) as address from adult
+inner join juvenile j on adult.member_no = j.adult_member_no
+left join loanhist l on l.member_no = adult.member_no
+where year(j.birth_date) < 1996
+and (l.member_no is null or l.due_date > GETDATE())
+
+
+select m.firstName + ' ' + m.LastName as imie, j.adult_member_no from member m
+inner join adult a on m.member_no = a.member_no
+left join juvenile j on j.adult_member_no = a.member_no
+where a.state = 'AZ'
+or a.state = 'CA'
+group by 2 -- poprawic
+
+
+
+use Northwind
+select companyName, round(sum(od.UnitPrice * od.Quantity * (1-od.Discount)),2) as cena from Customers c
+join orders o on o.CustomerID = c.CustomerID
+left join [Order Details] od on od.OrderID = o.OrderID
+
+group by companyName
