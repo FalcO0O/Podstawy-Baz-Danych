@@ -151,36 +151,29 @@ join orders as O on o.CustomerID = C.CustomerID
 join [Order Details] as OD on OD.OrderID = o.OrderID
 join Products as P on p.ProductID = od.ProductID
 join Categories as CA on CA.CategoryID = P.CategoryID
-where CategoryName = 'Confections'
+where CategoryName = 'Confections' -- and year(O.OrderDate) = 1997 osoby które zamówi³y z Confections 68
 
 
 -- do domu klienci którzy nie kupili z kat. confections i w roku 1997 (bez podzapytañ!)
-SELECT DISTINCT CompanyName, Phone
+
+SELECT DISTINCT C.CompanyName, C.Phone
 FROM Customers AS C
 JOIN Orders AS O ON O.CustomerID = C.CustomerID
-WHERE C.CustomerID NOT IN (
-    SELECT C.CustomerID
-    FROM Customers AS C
-    JOIN Orders AS O ON O.CustomerID = C.CustomerID
-    JOIN [Order Details] AS OD ON OD.OrderID = O.OrderID
-    JOIN Products AS P ON P.ProductID = OD.ProductID
-    JOIN Categories AS CA ON CA.CategoryID = P.CategoryID
-    WHERE CA.CategoryName = 'Confections'
-) and YEAR(O.OrderDate) = 1997
-
-SELECT DISTINCT c.CompanyName, c.Phone
-FROM Customers c
-JOIN Orders o ON c.CustomerID = o.CustomerID
-JOIN [Order Details] od ON o.OrderID = od.OrderID
-JOIN Products p ON od.ProductID = p.ProductID
-JOIN Categories cat ON p.CategoryID = cat.CategoryID
-WHERE YEAR(o.OrderDate) = 1997
-GROUP BY c.CustomerID, c.CompanyName, c.Phone
-HAVING SUM(CASE WHEN cat.CategoryName = 'Confections' THEN 1 ELSE 0 END) = 0;
+WHERE YEAR(O.OrderDate) = 1997
+EXCEPT
+SELECT DISTINCT C.CompanyName, C.Phone
+FROM Customers AS C
+JOIN Orders AS O ON O.CustomerID = C.CustomerID
+JOIN [Order Details] AS OD ON OD.OrderID = O.OrderID
+JOIN Products AS P ON P.ProductID = OD.ProductID
+JOIN Categories AS CA ON CA.CategoryID = P.CategoryID
+WHERE YEAR(O.OrderDate) = 1997 AND CA.CategoryName = 'Confections'; -- 18 osób
 
 
-
-
+select distinct CompanyName, Phone -- 18 + 68 = 86
+from Customers c
+join Orders o on c.CustomerID = o.CustomerID
+where year(o.OrderDate) = 1997
 
 
 
