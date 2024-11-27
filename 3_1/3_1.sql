@@ -1,7 +1,8 @@
 
 -- æw 1
 
--- 1
+-- 1
+
 SELECT 
     O.OrderID,
     C.CompanyName AS CustomerName,
@@ -77,7 +78,8 @@ INNER JOIN Products
 ON Products.CategoryID = Categories.CategoryID
 INNER JOIN [Order Details] AS OD
 ON OD.ProductID = Products.ProductID
-GROUP BY CategoryName;
+GROUP BY CategoryName;
+
 -- 3
 
 --a
@@ -99,7 +101,8 @@ ON Products.CategoryID = Categories.CategoryID
 INNER JOIN [Order Details] AS OD
 ON OD.ProductID = Products.ProductID
 GROUP BY CategoryName
-ORDER BY llzj;
+ORDER BY llzj;
+
 -- 4
 
 SELECT 

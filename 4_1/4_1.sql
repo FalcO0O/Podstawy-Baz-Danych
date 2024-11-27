@@ -157,8 +157,8 @@ GROUP BY EmployeeID
 
 -- 2
 
-SELECT TOP 1 E.FirstName + ' ' + e.LastName as 'name', (
- SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+SELECT TOP 1 e.FirstName + ' ' + e.LastName as 'name', (
+ SELECT round(SUM(OD.UnitPrice*od.quantity*(1-od.Discount)),2)
  from Orders AS O
  INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
  WHERE E.EmployeeID = O.EmployeeID AND year(O.ShippedDate) = 1997
